@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BountyMaster">
+<meta name="theme-color" content="#080808">
+<title>BountyMaster — Private Edition</title>
+<link rel="manifest" href="data:application/json,{%22name%22:%22BountyMaster%22,%22short_name%22:%22BM%22,%22display%22:%22standalone%22,%22background_color%22:%22%23080808%22,%22theme_color%22:%22%23f5a623%22}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #080808;
+  --bg2: #0f0f0f;
+  --surface: #141414;
+  --surface2: #1c1c1c;
+  --border: #242424;
+  --border2: #2e2e2e;
+  --orange: #f5a623;
+  --orange2: #ff8c00;
+  --orange-glow: rgba(245,166,35,0.15);
+  --orange-dim: #c47d0e;
+  --red: #ff4545;
+  --green: #3ddc84;
+  --text: #f0ede8;
+  --text2: #a09890;
+  --text3: #585450;
+  --white: #ffffff;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+[data-theme="light"] {
+  --bg: #f5f2ee;
+  --bg2: #ede9e4;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: #e0dbd4;
+  --border2: #d0c9c0;
+  --text: #1a1714;
+  --text2: #6b6460;
+  --text3: #a09890;
+  --orange-glow: rgba(245,166,35,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* GRAIN OVERLAY */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.5;
+}
+
+/* ORANGE AMBIENT GLOW */
+.glow-orb {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(245,166,35,0.06) 0%, transparent 70%);
+  border-radius: 50%;
+  top: -200px;
+  right: -200px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* HEADER */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(8,8,8,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background var(--transition);
+}
+
+[data-theme="light"] .header {
+  background: rgba(245,242,238,0.92);
+}
+
+.logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--orange);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #000;
+  letter-spacing: -1px;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.logo-text span { color: var(--orange); }
+
+.logo-badge {
+  font-size: 8px;
+  background: var(--orange-glow);
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+  margin-left: 2px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all var(--transition);
+}
+
+.icon-btn:hover { border-color: var(--orange); color: var(--orange); }
+.icon-btn.active { background: var(--orange-glow); border-color: var(--orange); color: var(--orange); }
+
+/* MAIN */
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 100px;
+  position: relative;
+  z-index: 1;
+}
+
+/* SCREENS */
+.screen { display: none; }
+.screen.active { display: block; animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1); }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* DASHBOARD HERO */
+.hero {
+  margin-bottom: 32px;
+  padding: 32px 0 0;
+}
+
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--orange);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--orange);
+}
+
+.hero-title {
+  font-size: clamp(36px, 8vw, 52px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 8px;
+}
+
+.hero-title .accent {
+  color: var(--orange);
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.hero-sub {
+  font-size: 14px;
+  color: var(--text2);
+  font-weight: 400;
+  line-height: 1.6;
+  max-width: 400px;
+}
+
+/* STATS */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  transition: border-color var(--transition);
+}
+
+.stat:hover { border-color: var(--border2); }
+
+.stat-n {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--orange);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-l {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* SECTION LABEL */
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* TOOL GRID */
+.tool-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--orange-glow);
+  opacity: 0;
+  transition: opacity var(--transition);
+  border-radius: var(--radius);
+}
+
+.tool-card:hover { border-color: var(--orange); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(245,166,35,0.08); }
+.tool-card:hover::after { opacity: 1; }
+.tool-card:active { transform: translateY(0); }
+
+.tool-card-icon {
+  font-size: 22px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.tool-card-name {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.3px;
+}
+
+.tool-card-desc {
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.5;
+  font-weight: 400;
+  position: relative;
+  z-index: 1;
+}
+
+.tool-card-arrow {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: var(--text3);
+  font-size: 14px;
+  transition: all var(--transition);
+  z-index: 1;
+}
+
+.tool-card:hover .tool-card-arrow { color: var(--orange); transform: translate(2px,-2px); }
+
+/* CHATBOT */
+.chat-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.chat-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.chat-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.chat-sub {
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 400;
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.chat-messages {
+  height: 280px;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.msg {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 400;
+  animation: msgIn 0.2s ease;
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg-user {
+  background: var(--orange);
+  color: #000;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  font-weight: 600;
+}
+
+.msg-bot {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  white-space: pre-wrap;
+}
+
+.msg-loading {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 14px;
+}
+
+.dot-bounce {
+  width: 6px;
+  height: 6px;
+  background: var(--text3);
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+
+.dot-bounce:nth-child(2) { animation-delay: 0.2s; }
+.dot-bounce:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+
+.chat-input-row {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.chat-input {
+  flex: 1;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: 'Syne', sans-serif;
+  resize: none;
+  outline: none;
+  min-height: 40px;
+  max-height: 120px;
+  line-height: 1.5;
+  transition: border-color var(--transition);
+}
+
+.chat-input:focus { border-color: var(--orange); }
+.chat-input::placeholder { color: var(--text3); }
+
+.chat-send {
+  width: 40px;
+  height: 40px;
+  background: var(--orange);
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  font-weight: 700;
+}
+
+.chat-send:hover { background: var(--orange2); transform: scale(1.05); }
+.chat-send:active { transform: scale(0.95); }
+
+.chat-voice-btn {
+  width: 40px;
+  height: 40px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text2);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+
+.chat-voice-btn:hover { border-color: var(--orange); color: var(--orange); }
+.chat-voice-btn.recording { background: rgba(255,69,69,0.15); border-color: var(--red); color: var(--red); animation: recordPulse 1s infinite; }
+
+@keyframes recordPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,69,69,0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(255,69,69,0); }
+}
+
+/* TOOL SCREENS */
+.tool-header {
+  padding: 24px 0 20px;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text2);
+  font-size: 12px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  transition: color var(--transition);
+  padding: 0;
+}
+
+.back-btn:hover { color: var(--orange); }
+
+.tool-name {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.tool-name .accent { color: var(--orange); font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
+
+.tool-desc { font-size: 13px; color: var(--text2); font-weight: 400; line-height: 1.6; }
+
+/* FORMS */
+.field { margin-bottom: 18px; }
+
+.field-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--orange);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.field-input, .field-textarea, .field-select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'Syne', sans-serif;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.field-input:focus, .field-textarea:focus { border-color: var(--orange); }
+.field-textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+.field-hint { font-size: 11px; color: var(--text3); margin-top: 5px; font-style: italic; }
+
+/* VOICE INPUT ROW */
+.input-with-voice {
+  position: relative;
+}
+
+.voice-field-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text2);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.voice-field-btn:hover { border-color: var(--orange); color: var(--orange); }
+.voice-field-btn.recording { border-color: var(--red); color: var(--red); }
+
+/* TAGS */
+.tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+.tag {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.5px;
+}
+
+.tag:hover { border-color: var(--orange); color: var(--orange); }
+.tag.on { border-color: var(--orange); background: var(--orange-glow); color: var(--orange); }
+
+/* BUTTONS */
+.btn-primary {
+  width: 100%;
+  background: var(--orange);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 15px 24px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition);
+  margin-top: 8px;
+}
+
+.btn-primary:hover { background: var(--orange2); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(245,166,35,0.25); }
+.btn-primary:active { transform: translateY(0); box-shadow: none; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* OUTPUT */
+.output {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-top: 16px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text);
+  white-space: pre-wrap;
+  display: none;
+  font-weight: 400;
+}
+
+.output.show { display: block; animation: slideUp 0.3s ease; }
+
+.output-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* STORY BANK */
+.story-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+.story-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.story-body { flex: 1; }
+.story-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.3px; }
+.story-text { font-size: 12px; color: var(--text2); line-height: 1.6; font-weight: 400; }
+.story-topic { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--orange); margin-top: 6px; }
+
+.story-del {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+  transition: color var(--transition);
+  flex-shrink: 0;
+}
+
+.story-del:hover { color: var(--red); }
+
+/* DEADLINE / HISTORY ITEMS */
+.list-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  transition: border-color var(--transition);
+}
+
+.list-item:hover { border-color: var(--border2); }
+
+.list-info { flex: 1; min-width: 0; }
+.list-name { font-size: 13px; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list-sub { font-size: 11px; color: var(--text2); font-family: 'JetBrains Mono', monospace; margin-top: 3px; }
+
+.list-right { text-align: right; flex-shrink: 0; }
+.list-prize { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+.list-prize.green { color: var(--green); }
+.list-time { font-size: 10px; font-family: 'JetBrains Mono', monospace; margin-top: 3px; }
+.list-time.red { color: var(--red); }
+.list-time.orange { color: var(--orange); }
+.list-time.dim { color: var(--text3); }
+
+.badge {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.badge-win { background: rgba(61,220,132,0.12); color: var(--green); border: 1px solid rgba(61,220,132,0.3); }
+.badge-loss { background: rgba(255,69,69,0.1); color: var(--red); border: 1px solid rgba(255,69,69,0.2); }
+.badge-pending { background: var(--orange-glow); color: var(--orange); border: 1px solid rgba(245,166,35,0.3); }
+
+/* EMPTY STATE */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text3);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.5; }
+
+/* ADD BTN */
+.add-btn {
+  width: 100%;
+  background: none;
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  color: var(--text2);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+}
+
+.add-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+/* MODAL */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 500;
+  display: none;
+  align-items: flex-end;
+  padding: 20px;
+}
+
+.modal-bg.show { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  animation: modalUp 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes modalUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+
+.modal-title span { color: var(--orange); }
+
+.modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+
+.btn-sec {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+  transition: all var(--transition);
+}
+
+.btn-sec:hover { border-color: var(--orange); color: var(--orange); }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(8,8,8,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 10px 0 max(10px, env(safe-area-inset-bottom));
+  z-index: 100;
+  transition: background var(--transition);
+}
+
+[data-theme="light"] .bottom-nav {
+  background: rgba(245,242,238,0.95);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: all var(--transition);
+}
+
+.nav-icon { font-size: 20px; transition: transform var(--transition); }
+.nav-label { font-size: 9px; font-family: 'JetBrains Mono', monospace; color: var(--text3); letter-spacing: 0.5px; transition: color var(--transition); }
+
+.nav-item.active .nav-icon { transform: scale(1.1); }
+.nav-item.active .nav-label { color: var(--orange); }
+
+/* TABS */
+.tabs { display: flex; gap: 0; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
+
+.tab-btn {
+  padding: 10px 18px;
+  font-size: 12px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+  margin-bottom: -1px;
+  transition: all var(--transition);
+}
+
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+/* VOICE RULES DISPLAY */
+.rules-display {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--orange);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text2);
+  font-weight: 400;
+  margin-bottom: 16px;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="glow-orb"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo-mark">
+    <div class="logo-icon">BM</div>
+    <div>
+      <div class="logo-text">Bounty<span>Master</span></div>
+    </div>
+    <div class="logo-badge">PRIVATE</div>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
+    <button class="icon-btn" onclick="navigate('profile')" title="Profile">⚙️</button>
+  </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="screen active" id="screen-home">
+    <div class="hero">
+      <div class="hero-eyebrow">Private Edition — AloneWrites_</div>
+      <h1 class="hero-title">Your <span class="accent">Bounty</span><br>Command Centre</h1>
+      <p class="hero-sub" id="heroSub">Full access. Every tool. Your thinking, your system.</p>
+    </div>
+
+    <div class="stats-strip">
+      <div class="stat">
+        <div class="stat-n" id="statSub">0</div>
+        <div class="stat-l">Submitted</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" id="statWin">0%</div>
+        <div class="stat-l">Win Rate</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" id="statEarn">$0</div>
+        <div class="stat-l">Earned</div>
+      </div>
+    </div>
+
+    <div class="section-label">Tools</div>
+    <div class="tool-grid">
+      <div class="tool-card" onclick="navigate('brief')">
+        <div class="tool-card-icon">📋</div>
+        <div class="tool-card-name">Brief Analyzer</div>
+        <div class="tool-card-desc">Full research strategy with Perplexity & Grok queries</div>
+        <div class="tool-card-arrow">↗</div>
+      </div>
+      <div class="tool-card" onclick="navigate('hooks')">
+        <div class="tool-card-icon">🪝</div>
+        <div class="tool-card-name">Hook Generator</div>
+        <div class="tool-card-desc">5 hooks. Controlled Outrage framework active</div>
+        <div class="tool-card-arrow">↗</div>
+      </div>
+      <div class="tool-card" onclick="navigate('angles')">
+        <div class="tool-card-icon">🎯</div>
+        <div class="tool-card-name">Angle Finder</div>
+        <div class="tool-card-desc">Find the gap. Beat the submission pool</div>
+        <div class="tool-card-arrow">↗</div>
+      </div>
+      <div class="tool-card" onclick="navigate('voice')">
+        <div class="tool-card-icon">🎙️</div>
+        <div class="tool-card-name">Voice Checker</div>
+        <div class="tool-card-desc">Full Controlled Outrage filter + grammar of voice</div>
+        <div class="tool-card-arrow">↗</div>
+      </div>
+      <div class="tool-card" onclick="navigate('intel')">
+        <div class="tool-card-icon">⚡</div>
+        <div class="tool-card-name">Content Intel</div>
+        <div class="tool-card-desc">Screenshot moment. Weakest link. Pre-flight check</div>
+        <div class="tool-card-arrow">↗</div>
+      </div>
+      <div class="tool-card" onclick="navigate('compete')">
+        <div class="tool-card-icon">🕵️</div>
+        <div class="tool-card-name">Competitor Intel</div>
+        <div class="tool-card-desc">Full scoring breakdown. Where you win or lose</div>
+        <div class="tool-card-arrow">↗</div>
+      </div>
+    </div>
+
+    <div class="section-label">BountyMaster Chat</div>
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="chat-dot"></div>
+        <div class="chat-title">Ask BountyMaster anything</div>
+        <div class="chat-sub">FULL ACCESS</div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg msg-bot">Hey. I'm your private BountyMaster. Ask me anything — analyze a brief, check your voice, find angles, compare submissions. Your full system is active. What are we working on?</div>
+      </div>
+      <div class="chat-input-row">
+        <button class="chat-voice-btn" id="chatVoiceBtn" onclick="toggleVoice('chatInput')" title="Voice input">🎤</button>
+        <textarea class="chat-input" id="chatInput" placeholder="Type or use voice..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="chat-send" onclick="sendChat()">↑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRIEF ANALYZER -->
+  <div class="screen" id="screen-brief">
+    <div class="tool-header">
+      <button class="back-btn" onclick="navigate('home')">← BACK</button>
+      <div class="tool-name">Brief <span class="accent">Analyzer</span></div>
+      <div class="tool-desc">Full research strategy. Perplexity and Grok queries labeled. Real verdict on whether it's worth your time.</div>
+    </div>
+    <div class="field">
+      <label class="field-label">Paste bounty brief — raw, don't clean it</label>
+      <div class="input-with-voice">
+        <textarea class="field-textarea" id="briefIn" placeholder="Drop everything: brief, requirements, prizes, judging criteria." style="min-height:160px; padding-bottom:44px;"></textarea>
+        <button class="voice-field-btn" onclick="toggleVoice('briefIn')" id="briefVoiceBtn">🎤</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="runBrief()">ANALYZE BRIEF →</button>
+    <div class="output" id="briefOut"></div>
+  </div>
+
+  <!-- HOOK GENERATOR -->
+  <div class="screen" id="screen-hooks">
+    <div class="tool-header">
+      <button class="back-btn" onclick="navigate('home')">← BACK</button>
+      <div class="tool-name">Hook <span class="accent">Generator</span></div>
+      <div class="tool-desc">5 hooks using Controlled Outrage framework. Pick the one that sounds like AloneWrites_.</div>
+    </div>
+    <div class="field">
+      <label class="field-label">What is the bounty about?</label>
+      <div class="input-with-voice">
+        <textarea class="field-textarea" id="hookBrief" placeholder="Product, problem it solves, target audience, key features."></textarea>
+        <button class="voice-field-btn" onclick="toggleVoice('hookBrief')" id="hookBriefVoice">🎤</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Your personal angle</label>
+      <div class="input-with-voice">
+        <textarea class="field-textarea" id="hookPersonal" placeholder="What did YOU experience? What number surprised you? What moment made you pause?" style="min-height:80px;"></textarea>
+        <button class="voice-field-btn" onclick="toggleVoice('hookPersonal')" id="hookPersonalVoice">🎤</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="runHooks()">GENERATE 5 HOOKS →</button>
+    <div class="output" id="hookOut"></div>
+  </div>
+
+  <!-- ANGLE FINDER -->
+  <div class="screen" id="screen-angles">
+    <div class="tool-header">
+      <button class="back-btn" onclick="navigate('home')">← BACK</button>
+      <div class="tool-name">Angle <span class="accent">Finder</span></div>
+      <div class="tool-desc">Paste their submission. Find every gap they missed. Find the angle that beats them.</div>
+    </div>
+    <div class="field">
+      <label class="field-label">Their submission</label>
+      <textarea class="field-textarea" id="angleComp" placeholder="Paste their full thread or article." style="min-height:140px;"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">Bounty topic / context</label>
+      <input type="text" class="field-input" id="angleCtx" placeholder="e.g. Finna stablecoin platform for Nigerians">
+    </div>
+    <button class="btn-primary" onclick="runAngles()">FIND THE GAP →</button>
+    <div class="output" id="angleOut"></div>
+  </div>
+
+  <!-- VOICE CHECKER -->
+  <div class="screen" id="screen-voice">
+    <div class="tool-header">
+      <button class="back-btn" onclick="navigate('home')">← BACK</button>
+      <div class="tool-name">Voice <span class="accent">Checker</span></div>
+      <div class="tool-desc">Full Controlled Outrage filter. Flags AI sentences, broken flow, fragmented stops, and explained emotions.</div>
+    </div>
+    <div class="rules-display" id="voiceRulesDisplay">Loading your voice rules...</div>
+    <div class="field">
+      <label class="field-label">Your draft</label>
+      <div class="input-with-voice">
+        <textarea class="field-textarea" id="voiceIn" placeholder="Paste your thread or article." style="min-height:160px; padding-bottom:44px;"></textarea>
+        <button class="voice-field-btn" onclick="toggleVoice('voiceIn')" id="voiceInBtn">🎤</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="runVoice()">CHECK VOICE →</button>
+    <div class="output" id="voiceOut"></div>
+  </div>
+
+  <!-- CONTENT INTEL -->
+  <div class="screen" id="screen-intel">
+    <div class="tool-header">
+      <button class="back-btn" onclick="navigate('home')">← BACK</button>
+      <div class="tool-name">Content <span class="accent">Intel</span></div>
+      <div class="tool-desc">Your screenshot moment. Your weakest link. Full pre-flight check before you post.</div>
+    </div>
+    <div class="field">
+      <label class="field-label">Your full thread — tweet by tweet</label>
+      <textarea class="field-textarea" id="intelIn" placeholder="Paste the complete thread." style="min-height:160px;"></textarea>
+    </div>
+    <button class="btn-primary" onclick="runIntel()">ANALYZE THREAD →</button>
+    <div class="output" id="intelOut"></div>
+  </div>
+
+  <!-- COMPETITOR INTEL -->
+  <div class="screen" id="screen-compete">
+    <div class="tool-header">
+      <button class="back-btn" onclick="navigate('home')">← BACK</button>
+      <div class="tool-name">Competitor <span class="accent">Intel</span></div>
+      <div class="tool-desc">Full scoring breakdown. See exactly where you win and where you don't.</div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this,'tabYours')">YOUR PIECE</button>
+      <button class="tab-btn" onclick="switchTab(this,'tabTheirs')">THEIR PIECE</button>
+    </div>
+    <div id="tabYours"><textarea class="field-textarea" id="compYours" placeholder="Paste your submission." style="min-height:140px;"></textarea></div>
+    <div id="tabTheirs" style="display:none"><textarea class="field-textarea" id="compTheirs" placeholder="Paste their submission." style="min-height:140px;"></textarea></div>
+    <button class="btn-primary" style="margin-top:14px" onclick="runCompete()">COMPARE & SCORE →</button>
+    <div class="output" id="compOut"></div>
+  </div>
+
+  <!-- DEADLINES -->
+  <div class="screen" id="screen-deadlines">
+    <div class="tool-header">
+      <button class="back-btn" onclick="navigate('home')">← BACK</button>
+      <div class="tool-name">Deadline <span class="accent">Brain</span></div>
+      <div class="tool-desc">Every active bounty. Never miss a window.</div>
+    </div>
+    <div id="deadlineList"></div>
+    <button class="add-btn" onclick="openModal('deadlineModal')">+ ADD BOUNTY DEADLINE</button>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="screen" id="screen-history">
+    <div class="tool-header">
+      <button class="back-btn" onclick="navigate('home')">← BACK</button>
+      <div class="tool-name">Submission <span class="accent">History</span></div>
+      <div class="tool-desc">Your full track record. Win rate. Earnings. Patterns.</div>
+    </div>
+    <div id="historyList"></div>
+    <button class="add-btn" onclick="openModal('historyModal')">+ LOG SUBMISSION</button>
+  </div>
+
+  <!-- STORY BANK -->
+  <div class="screen" id="screen-stories">
+    <div class="tool-header">
+      <button class="back-btn" onclick="navigate('home')">← BACK</button>
+      <div class="tool-name">Story <span class="accent">Bank</span></div>
+      <div class="tool-desc">Your personal experiences stored and ready to inject into any thread.</div>
+    </div>
+    <div class="story-list" id="storyList"></div>
+    <button class="add-btn" onclick="openModal('storyModal')">+ ADD STORY</button>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="screen" id="screen-profile">
+    <div class="tool-header">
+      <button class="back-btn" onclick="navigate('home')">← BACK</button>
+      <div class="tool-name">Voice <span class="accent">Profile</span></div>
+      <div class="tool-desc">Your identity. Your rules. Your system.</div>
+    </div>
+    <div class="field">
+      <label class="field-label">Name / Brand</label>
+      <input type="text" class="field-input" id="pName" placeholder="e.g. AloneWrites_">
+    </div>
+    <div class="field">
+      <label class="field-label">Voice Style</label>
+      <div class="tag-group">
+        <div class="tag on" onclick="toggleTag(this)">Controlled Outrage</div>
+        <div class="tag" onclick="toggleTag(this)">Neutral Explainer</div>
+        <div class="tag" onclick="toggleTag(this)">Investigative</div>
+        <div class="tag" onclick="toggleTag(this)">Personal Story</div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Voice Rules — your personal laws</label>
+      <textarea class="field-textarea" id="pRules" placeholder="e.g. No fragmented full stops as drama. Commas over periods. Sentences flow like a storybook. Outrage carried by data not performance. One sharp line over three bullet points. Never explain the emotion — express it.">No fragmented full stops as drama. Commas over periods. Sentences flow like a storybook. Outrage carried by data not performance. One sharp line over three bullet points. Never explain the emotion — express it. Real numbers do the work. The reader should feel it without being told to.</textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">Niche</label>
+      <input type="text" class="field-input" id="pNiche" placeholder="e.g. Nigerian DeFi, Solana ecosystem, Web3 content">
+    </div>
+    <div class="field">
+      <label class="field-label">Research Tools (your private workflow)</label>
+      <div class="tag-group">
+        <div class="tag on" onclick="toggleTag(this)">Perplexity</div>
+        <div class="tag on" onclick="toggleTag(this)">Grok</div>
+        <div class="tag on" onclick="toggleTag(this)">ChatGPT</div>
+        <div class="tag" onclick="toggleTag(this)">Google</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="saveProfile()">SAVE PROFILE →</button>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="nav-item active" onclick="navigate('home')" id="nav-home">
+    <div class="nav-icon">🏠</div>
+    <div class="nav-label">HOME</div>
+  </div>
+  <div class="nav-item" onclick="navigate('deadlines')" id="nav-deadlines">
+    <div class="nav-icon">⏰</div>
+    <div class="nav-label">DEADLINES</div>
+  </div>
+  <div class="nav-item" onclick="navigate('stories')" id="nav-stories">
+    <div class="nav-icon">📖</div>
+    <div class="nav-label">STORIES</div>
+  </div>
+  <div class="nav-item" onclick="navigate('history')" id="nav-history">
+    <div class="nav-icon">📊</div>
+    <div class="nav-label">HISTORY</div>
+  </div>
+</nav>
+
+<!-- DEADLINE MODAL -->
+<div class="modal-bg" id="deadlineModal">
+  <div class="modal">
+    <div class="modal-title">Add <span>Deadline</span></div>
+    <div class="field"><label class="field-label">Bounty Name</label><input type="text" class="field-input" id="dlName" placeholder="e.g. Finna Writers Bounty"></div>
+    <div class="field"><label class="field-label">Platform</label><input type="text" class="field-input" id="dlPlatform" placeholder="e.g. Superteam Nigeria"></div>
+    <div class="field"><label class="field-label">Prize</label><input type="text" class="field-input" id="dlPrize" placeholder="e.g. $1,000"></div>
+    <div class="field"><label class="field-label">Deadline</label><input type="date" class="field-input" id="dlDate"></div>
+    <div class="modal-btns">
+      <button class="btn-sec" onclick="closeModal('deadlineModal')">CANCEL</button>
+      <button class="btn-primary" style="margin-top:0" onclick="saveDeadline()">SAVE →</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="modal-bg" id="historyModal">
+  <div class="modal">
+    <div class="modal-title">Log <span>Submission</span></div>
+    <div class="field"><label class="field-label">Bounty Name</label><input type="text" class="field-input" id="hName" placeholder="e.g. Finna Writers Bounty"></div>
+    <div class="field"><label class="field-label">Platform</label><input type="text" class="field-input" id="hPlatform" placeholder="e.g. Superteam Nigeria"></div>
+    <div class="field"><label class="field-label">Prize Amount</label><input type="text" class="field-input" id="hPrize" placeholder="e.g. $1,000"></div>
+    <div class="field"><label class="field-label">Outcome</label>
+      <select class="field-select" id="hOutcome">
+        <option value="pending">Pending</option>
+        <option value="win">Win 🏆</option>
+        <option value="loss">Loss</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-sec" onclick="closeModal('historyModal')">CANCEL</button>
+      <button class="btn-primary" style="margin-top:0" onclick="saveHistory()">LOG →</button>
+    </div>
+  </div>
+</div>
+
+<!-- STORY MODAL -->
+<div class="modal-bg" id="storyModal">
+  <div class="modal">
+    <div class="modal-title">Add <span>Story</span></div>
+    <div class="field"><label class="field-label">Story Title</label><input type="text" class="field-input" id="sTitle" placeholder="e.g. The ₦20K loan app experience"></div>
+    <div class="field"><label class="field-label">The Story</label><textarea class="field-textarea" id="sText" placeholder="Write it exactly as you'd tell it. First person. Specific details." style="min-height:100px;"></textarea></div>
+    <div class="field"><label class="field-label">Best used for (topic)</label><input type="text" class="field-input" id="sTopic" placeholder="e.g. fintech, lending, naira volatility"></div>
+    <div class="modal-btns">
+      <button class="btn-sec" onclick="closeModal('storyModal')">CANCEL</button>
+      <button class="btn-primary" style="margin-top:0" onclick="saveStory()">SAVE →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ STATE ============
+let profile = JSON.parse(localStorage.getItem('bmp_profile') || 'null');
+let deadlines = JSON.parse(localStorage.getItem('bmp_deadlines') || '[]');
+let history = JSON.parse(localStorage.getItem('bmp_history') || '[]');
+let stories = JSON.parse(localStorage.getItem('bmp_stories') || '[]');
+let chatHistory = [];
+let isRecording = false;
+let recognition = null;
+let currentVoiceTarget = null;
+
+// ============ THEME ============
+function initTheme() {
+  const saved = localStorage.getItem('bmp_theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (prefersDark ? 'dark' : 'light');
+  applyTheme(theme);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : '');
+  document.getElementById('themeBtn').textContent = theme === 'light' ? '🌙' : '☀️';
+  localStorage.setItem('bmp_theme', theme);
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', theme === 'light' ? '#f5f2ee' : '#080808');
+}
+
+function toggleTheme() {
+  const current = localStorage.getItem('bmp_theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+// ============ NAVIGATION ============
+function navigate(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + screen);
+  if (navEl) navEl.classList.add('active');
+
+  if (screen === 'voice') updateVoiceRulesDisplay();
+  if (screen === 'profile') loadProfileForm();
+  if (screen === 'deadlines') renderDeadlines();
+  if (screen === 'history') renderHistory();
+  if (screen === 'stories') renderStories();
+  if (screen === 'home') updateDashboard();
+
+  window.scrollTo(0, 0);
+}
+
+// ============ PROFILE ============
+function saveProfile() {
+  const name = document.getElementById('pName').value.trim() || 'AloneWrites_';
+  const rules = document.getElementById('pRules').value.trim();
+  const niche = document.getElementById('pNiche').value.trim();
+  const voice = [...document.querySelectorAll('#screen-profile .tag.on')].map(t => t.textContent);
+  const tools = voice; // reuse tag selection logic
+
+  profile = { name, rules, niche, voice, tools };
+  localStorage.setItem('bmp_profile', JSON.stringify(profile));
+  updateDashboard();
+  navigate('home');
+}
+
+function loadProfileForm() {
+  if (!profile) return;
+  document.getElementById('pName').value = profile.name || '';
+  document.getElementById('pRules').value = profile.rules || '';
+  document.getElementById('pNiche').value = profile.niche || '';
+}
+
+function getVoice() {
+  if (!profile) return {
+    name: 'AloneWrites_',
+    rules: 'No fragmented full stops as drama. Commas over periods. Sentences flow like a storybook. Outrage carried by data not performance. One sharp line over three bullet points. Never explain the emotion — express it.',
+    niche: 'Nigerian DeFi, Web3, Solana ecosystem'
+  };
+  return profile;
+}
+
+function updateVoiceRulesDisplay() {
+  const v = getVoice();
+  document.getElementById('voiceRulesDisplay').textContent = v.rules || 'No voice rules set. Go to Profile to add them.';
+}
+
+function updateDashboard() {
+  const v = getVoice();
+  document.getElementById('heroSub').textContent = `${v.name} — ${(v.voice && v.voice[0]) || 'Controlled Outrage'} mode active.`;
+
+  const wins = history.filter(h => h.outcome === 'win').length;
+  const rate = history.length ? Math.round((wins/history.length)*100) : 0;
+  const earned = history.filter(h => h.outcome === 'win').reduce((s,h) => s + (parseFloat(h.prize.replace(/[^0-9.]/g,''))||0), 0);
+
+  document.getElementById('statSub').textContent = history.length;
+  document.getElementById('statWin').textContent = rate + '%';
+  document.getElementById('statEarn').textContent = '$' + earned;
+}
+
+// ============ CLAUDE API ============
+async function claude(prompt) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const data = await res.json();
+  return data.content?.[0]?.text || 'No response.';
+}
+
+function voiceCtx() {
+  const v = getVoice();
+  return `
+WRITER: ${v.name}
+VOICE: ${(v.voice||['Controlled Outrage']).join(', ')}
+VOICE RULES: ${v.rules || 'No fragmented full stops as drama. Commas over periods. Sentences flow like a storybook. Outrage carried by data not performance. One sharp line over three bullet points. Never explain the emotion — express it. Real numbers do the work.'}
+NICHE: ${v.niche || 'Nigerian DeFi, Web3, Solana ecosystem'}
+RESEARCH TOOLS: Perplexity (for deep research and fact-checking), Grok (for real-time X/Twitter data and CT sentiment), ChatGPT (for cross-referencing and ideation)`;
+}
+
+function showOut(id, loading = true) {
+  const el = document.getElementById(id);
+  el.className = 'output show';
+  if (loading) el.innerHTML = '<div class="output-loading"><div class="spinner"></div><span>Analyzing...</span></div>';
+  return el;
+}
+
+function setOut(id, text) {
+  const el = document.getElementById(id);
+  el.className = 'output show';
+  el.textContent = text;
+}
+
+// ============ TOOLS ============
+async function runBrief() {
+  const brief = document.getElementById('briefIn').value.trim();
+  if (!brief) return alert('Paste the brief first.');
+  showOut('briefOut');
+  try {
+    const r = await claude(`${voiceCtx()}
+
+You are BountyMaster — a private bounty writing system for ${getVoice().name}.
+
+Analyze this bounty brief fully:
+
+1. WHAT THEY ACTUALLY WANT — beyond the stated requirements, what would truly win?
+2. HONEST VERDICT — is this worth pursuing? (Prize vs competition vs effort. Be direct.)
+3. THE ANGLE NOBODY WILL TAKE — specific to this brief and this writer's niche
+4. CONTROLLED OUTRAGE ANGLE — how would ${getVoice().name}'s voice approach this?
+5. RESEARCH STRATEGY:
+   — PERPLEXITY QUERIES (deep research, statistics, regulatory context):
+     Query 1: [specific]
+     Query 2: [specific]
+     Query 3: [specific]
+   — GROK QUERIES (CT sentiment, what writers are saying, community pulse):
+     Query 1: [specific]
+     Query 2: [specific]
+   — IN-APP RESEARCH (what to check directly in the product):
+     Check 1: [specific]
+     Check 2: [specific]
+6. RED FLAGS — anything that could disqualify or waste time
+7. JUDGING CRITERIA RANKED — what actually wins points in order of weight
+8. COMPETITION INTEL — how many submissions, what the pool likely looks like
+
+BRIEF:
+${brief}`);
+    setOut('briefOut', r);
+  } catch(e) { setOut('briefOut', 'Error: ' + e.message); }
+}
+
+async function runHooks() {
+  const brief = document.getElementById('hookBrief').value.trim();
+  const personal = document.getElementById('hookPersonal').value.trim();
+  if (!brief) return alert('Describe the bounty first.');
+  showOut('hookOut');
+  try {
+    const r = await claude(`${voiceCtx()}
+
+Generate exactly 5 opening hooks for a bounty thread. Each must use a completely different strategy.
+
+The writer is ${getVoice().name}. Their voice is ${(getVoice().voice||['Controlled Outrage']).join(', ')}.
+Voice rules: ${getVoice().rules}
+
+Hook strategies:
+1. CONTROLLED OUTRAGE HOOK — personal experience, outrage carried by data not performance, flowing sentences
+2. STATISTIC HOOK — lead with the most shocking number, no setup needed
+3. CONTRARIAN HOOK — say the opposite of what every other submission will open with
+4. PERSONAL MOMENT HOOK — specific scene, specific detail, you were there
+5. INDICTMENT HOOK — indict the system before introducing the solution
+
+Rules: No fragmented full stops used as drama. Sentences connect. Reads like a storybook opening.
+
+TOPIC: ${brief}
+PERSONAL ANGLE: ${personal || 'none provided — generate based on what a Nigerian DeFi writer might experience'}
+
+Format each as: NUMBER. HOOK TEXT
+Then: → Why this works for ${getVoice().name}`);
+    setOut('hookOut', r);
+  } catch(e) { setOut('hookOut', 'Error: ' + e.message); }
+}
+
+async function runAngles() {
+  const comp = document.getElementById('angleComp').value.trim();
+  const ctx = document.getElementById('angleCtx').value.trim();
+  if (!comp) return alert('Paste their submission first.');
+  showOut('angleOut');
+  try {
+    const r = await claude(`${voiceCtx()}
+
+Analyze this competitor submission for gaps and missed angles.
+
+WRITER: ${getVoice().name} — ${(getVoice().voice||['Controlled Outrage']).join(', ')}
+BOUNTY TOPIC: ${ctx}
+
+THEIR SUBMISSION:
+${comp}
+
+Provide:
+1. GRADE (A-F) — one brutal honest sentence
+2. WHAT THEY GOT RIGHT — max 3 specific points, be genuine
+3. THE GAPS — every angle they missed, every number they didn't find, every insight they skipped
+4. WHAT ONLY ${getVoice().name} COULD ADD — angles requiring personal experience, deeper research, or Controlled Outrage voice specifically
+5. THE DATA THEY MISSED — specific statistics or comparisons that would strengthen the argument
+6. THE WINNING MOVE — the single most specific thing that would make a competing piece unbeatable
+7. AI TELLS — list any sentences that sound AI-generated (this matters for judging)`);
+    setOut('angleOut', r);
+  } catch(e) { setOut('angleOut', 'Error: ' + e.message); }
+}
+
+async function runVoice() {
+  const draft = document.getElementById('voiceIn').value.trim();
+  if (!draft) return alert('Paste your draft first.');
+  showOut('voiceOut');
+  try {
+    const r = await claude(`${voiceCtx()}
+
+You are the voice consistency checker for ${getVoice().name}.
+
+VOICE RULES ACTIVE:
+${getVoice().rules}
+
+Analyze this draft against these rules strictly:
+
+1. AI SLOP — quote every sentence that sounds AI-generated or templated
+2. FRAGMENTED FLOW — every place where a full stop is doing the work a comma should do (quote them)
+3. EXPLAINED EMOTION — every place where the writer describes how to feel instead of making you feel it
+4. BULLET POINT ENERGY — sentences that should be flowing prose but read like a list
+5. STRONG MOMENTS — quote the sentences that genuinely sound like ${getVoice().name} (protect these)
+6. CONTROLLED OUTRAGE SCORE — how well does the outrage come through via data vs performance? (0-10)
+7. VERDICT — Ship it now / Fix these specific things first (be specific, not vague)
+
+DRAFT:
+${draft}`);
+    setOut('voiceOut', r);
+  } catch(e) { setOut('voiceOut', 'Error: ' + e.message); }
+}
+
+async function runIntel() {
+  const content = document.getElementById('intelIn').value.trim();
+  if (!content) return alert('Paste your thread first.');
+  showOut('intelOut');
+  try {
+    const r = await claude(`${voiceCtx()}
+
+Pre-flight content check for ${getVoice().name} before posting.
+
+Analyze this thread:
+
+1. SCREENSHOT MOMENT — which tweet will get saved and shared most, and exactly why
+2. SCROLL STOPPER — does tweet 1 stop the scroll? Honest verdict
+3. WEAKEST LINK — which tweet loses the reader and why specifically
+4. CLOSING VERDICT — does the final tweet land as hard as the first?
+5. CONTROLLED OUTRAGE PEAK — which tweet has the most Controlled Outrage energy?
+6. NUMBER CHECK — are all statistics specific enough? Any vague claims?
+7. VOICE CONSISTENCY — does it sound like the same person throughout?
+8. JUDGES WILL NOTICE — what will stand out positively to bounty judges?
+9. ONE THING TO FIX — the single most important change before posting
+
+THREAD:
+${content}`);
+    setOut('intelOut', r);
+  } catch(e) { setOut('intelOut', 'Error: ' + e.message); }
+}
+
+async function runCompete() {
+  const yours = document.getElementById('compYours').value.trim();
+  const theirs = document.getElementById('compTheirs').value.trim();
+  if (!yours || !theirs) return alert('Paste both submissions first.');
+  showOut('compOut');
+  try {
+    const r = await claude(`${voiceCtx()}
+
+Compare two bounty submissions. Full scoring breakdown.
+
+WRITER A: ${getVoice().name}
+VOICE: ${(getVoice().voice||['Controlled Outrage']).join(', ')}
+
+SCORING CRITERIA (full breakdown):
+— Voice & Originality (25pts): Does it sound human? Is there a distinct perspective?
+— Research Depth & Accuracy (25pts): Specific numbers, facts, comparisons, primary sources
+— Storytelling & Hook Quality (25pts): Does it open well? Does it close well? Does the narrative hold?
+— Clarity & Flow (25pts): Easy to read? Sentences connect? No fragmentation?
+
+Score both out of 100. Show breakdown per category.
+
+Then:
+WHERE A WINS — specific sentences/sections
+WHERE B WINS — be honest, specific
+WHAT WOULD MAKE A UNBEATABLE — the one addition or change
+AI TELLS IN B — any sentences that sound AI-generated
+FINAL PREDICTION — who wins the bounty and why
+
+SUBMISSION A (${getVoice().name}):
+${yours}
+
+SUBMISSION B (Competitor):
+${theirs}`);
+    setOut('compOut', r);
+  } catch(e) { setOut('compOut', 'Error: ' + e.message); }
+}
+
+// ============ CHATBOT ============
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  addMsg(msg, 'user');
+  chatHistory.push({ role: 'user', content: msg });
+
+  const loadingMsg = addLoadingMsg();
+
+  try {
+    const systemPrompt = `${voiceCtx()}
+
+You are BountyMaster — the private AI writing assistant for ${getVoice().name}.
+
+You know everything about:
+- Bounty writing strategy for Web3 platforms (Superteam, Gitcoin, Layer3)
+- The Controlled Outrage voice framework
+- Research methodology using Perplexity, Grok, and ChatGPT
+- Nigerian DeFi, Solana ecosystem, stablecoin content
+- Thread writing, article writing, voice checking, competitor analysis
+
+Respond directly and helpfully. No fluff. Sound like a sharp creative partner, not a generic AI.
+User's stories for context: ${JSON.stringify(stories.slice(0,3))}`;
+
+    const messages = chatHistory.map(h => ({ role: h.role, content: h.content }));
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'No response.';
+
+    loadingMsg.remove();
+    addMsg(reply, 'bot');
+    chatHistory.push({ role: 'assistant', content: reply });
+
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+  } catch(e) {
+    loadingMsg.remove();
+    addMsg('Error: ' + e.message, 'bot');
+  }
+}
+
+function addMsg(text, type) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `msg msg-${type}`;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function addLoadingMsg() {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg-loading';
+  div.innerHTML = '<div class="dot-bounce"></div><div class="dot-bounce"></div><div class="dot-bounce"></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ============ VOICE INPUT ============
+function initVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-NG';
+
+  recognition.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    const target = document.getElementById(currentVoiceTarget);
+    if (target) {
+      target.value += (target.value ? ' ' : '') + text;
+      if (currentVoiceTarget === 'chatInput') autoResize(target);
+    }
+    stopRecording();
+  };
+
+  recognition.onerror = () => stopRecording();
+  recognition.onend = () => stopRecording();
+}
+
+function toggleVoice(targetId) {
+  if (!recognition) { alert('Voice input not supported in this browser. Try Chrome.'); return; }
+  if (isRecording) { stopRecording(); return; }
+  currentVoiceTarget = targetId;
+  isRecording = true;
+  recognition.start();
+  updateVoiceBtns(targetId, true);
+}
+
+function stopRecording() {
+  isRecording = false;
+  if (recognition) try { recognition.stop(); } catch(e){}
+  updateVoiceBtns(null, false);
+}
+
+function updateVoiceBtns(activeId, recording) {
+  document.querySelectorAll('.chat-voice-btn, .voice-field-btn').forEach(btn => {
+    btn.classList.remove('recording');
+  });
+  if (recording && activeId) {
+    const chatBtn = document.getElementById('chatVoiceBtn');
+    if (chatBtn && activeId === 'chatInput') chatBtn.classList.add('recording');
+    const fieldBtn = document.getElementById(activeId + 'VoiceBtn') || document.getElementById(activeId.replace('In','') + 'VoiceBtn');
+    if (fieldBtn) fieldBtn.classList.add('recording');
+  }
+}
+
+// ============ DEADLINES ============
+function saveDeadline() {
+  const name = document.getElementById('dlName').value.trim();
+  const date = document.getElementById('dlDate').value;
+  if (!name || !date) return alert('Name and date required.');
+  deadlines.push({ id: Date.now(), name, platform: document.getElementById('dlPlatform').value.trim(), prize: document.getElementById('dlPrize').value.trim(), date });
+  localStorage.setItem('bmp_deadlines', JSON.stringify(deadlines));
+  closeModal('deadlineModal');
+  ['dlName','dlPlatform','dlPrize','dlDate'].forEach(id => document.getElementById(id).value = '');
+  renderDeadlines();
+}
+
+function renderDeadlines() {
+  const el = document.getElementById('deadlineList');
+  if (!deadlines.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">⏰</div>No deadlines tracked yet.</div>'; return; }
+  const now = new Date();
+  el.innerHTML = [...deadlines].sort((a,b) => new Date(a.date)-new Date(b.date)).map(d => {
+    const diff = Math.ceil((new Date(d.date)-now)/(1000*60*60*24));
+    const cls = diff<=2?'red':diff<=7?'orange':'dim';
+    const txt = diff<=0?'EXPIRED':diff+' day'+(diff===1?'':'s')+' left';
+    return `<div class="list-item">
+      <div class="list-info"><div class="list-name">${d.name}</div><div class="list-sub">${d.platform||'Unknown'}</div></div>
+      <div class="list-right"><div class="list-prize">${d.prize||'—'}</div><div class="list-time ${cls}">${txt}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ============ HISTORY ============
+function saveHistory() {
+  const name = document.getElementById('hName').value.trim();
+  if (!name) return alert('Bounty name required.');
+  history.push({ id: Date.now(), name, platform: document.getElementById('hPlatform').value.trim(), prize: document.getElementById('hPrize').value.trim(), outcome: document.getElementById('hOutcome').value, date: new Date().toLocaleDateString() });
+  localStorage.setItem('bmp_history', JSON.stringify(history));
+  closeModal('historyModal');
+  ['hName','hPlatform','hPrize'].forEach(id => document.getElementById(id).value = '');
+  renderHistory();
+  updateDashboard();
+}
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (!history.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📊</div>No submissions logged yet.</div>'; return; }
+  el.innerHTML = [...history].reverse().map(h => {
+    const badgeCls = h.outcome==='win'?'badge-win':h.outcome==='loss'?'badge-loss':'badge-pending';
+    const prizeCls = h.outcome==='win'?'green':'';
+    return `<div class="list-item">
+      <div class="list-info"><div class="list-name">${h.name}</div><div class="list-sub">${h.platform||''} · ${h.date}</div></div>
+      <div class="list-right"><div class="list-prize ${prizeCls}">${h.prize||'—'}</div><span class="badge ${badgeCls}">${h.outcome.toUpperCase()}</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ============ STORIES ============
+function saveStory() {
+  const title = document.getElementById('sTitle').value.trim();
+  const text = document.getElementById('sText').value.trim();
+  if (!title||!text) return alert('Title and story required.');
+  stories.push({ id: Date.now(), title, text, topic: document.getElementById('sTopic').value.trim() });
+  localStorage.setItem('bmp_stories', JSON.stringify(stories));
+  closeModal('storyModal');
+  ['sTitle','sText','sTopic'].forEach(id => document.getElementById(id).value = '');
+  renderStories();
+}
+
+function renderStories() {
+  const el = document.getElementById('storyList');
+  if (!stories.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📖</div>No stories stored yet. Add your personal experiences.</div>'; return; }
+  el.innerHTML = stories.map(s => `
+    <div class="story-card">
+      <div class="story-body">
+        <div class="story-title">${s.title}</div>
+        <div class="story-text">${s.text.slice(0,120)}${s.text.length>120?'...':''}</div>
+        ${s.topic?`<div class="story-topic">→ ${s.topic}</div>`:''}
+      </div>
+      <button class="story-del" onclick="deleteStory(${s.id})">✕</button>
+    </div>`).join('');
+}
+
+function deleteStory(id) {
+  stories = stories.filter(s => s.id !== id);
+  localStorage.setItem('bmp_stories', JSON.stringify(stories));
+  renderStories();
+}
+
+// ============ MODALS ============
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('show'); }));
+
+// ============ TABS ============
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tabYours').style.display = tabId==='tabYours'?'block':'none';
+  document.getElementById('tabTheirs').style.display = tabId==='tabTheirs'?'block':'none';
+}
+
+// ============ TAGS ============
+function toggleTag(el) { el.classList.toggle('on'); }
+
+// ============ INIT ============
+initTheme();
+initVoice();
+updateDashboard();
+renderDeadlines();
+renderHistory();
+renderStories();
+
+// Pre-load Openfort win into history if empty
+if (!history.length) {
+  history.push({ id: 1, name: 'Openfort LATAM Bounty', platform: 'Openfort', prize: '$15', outcome: 'win', date: '2/17/2026' });
+  localStorage.setItem('bmp_history', JSON.stringify(history));
+  updateDashboard();
+}
+</script>
+</body>
+</html>
